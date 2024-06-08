@@ -1,0 +1,31 @@
+body {
+  padding: 2%;
+}
+
+input[type=text] {
+  border-radius: 3px;
+}
+
+div {
+    padding: 1%;
+}
+
+table.processo {
+  padding: 5px;
+  margin-top: 50px;
+  border-collapse: collapse;
+}
+
+.processo > th, .processo > tr {
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  padding: 5px;
+
+  text-align: left;
+  border-collapse: collapse;
+}
+
+table.processo {
+  display: inline;
+}

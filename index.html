@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="css.css">
+</head>
+
+<body>
+  <div id="formularios">
+    <form>
+      <p>Tipo de processamento:</p>
+
+      <input type="radio" name="tipo_processamento" value="round_robin">
+      <label for="round_robin">Round Robin</label>
+      <br>
+      <input type="radio" name="tipo_processamento" value="sjf">
+      <label for="sfj">Shrtest-Job-First</label>
+      <br>
+      <input type="radio" name="tipo_processamento" value="prioridade">
+      <label for="prioridade">Por prioridade</label>
+
+    </form>
+    <form>
+      <p>Adicionar um processo:</p>
+      <label>Nome:</label>
+      <input type="text" id="nome">
+      <br>
+      <label>Duracao (ciclos de máquina):</label>
+      <input type="text" id="duracao">
+
+
+      <br>
+      <button type="button" onclick="adicionarProcesso()">Adicionar</button>
+    </form>
+  </div>
+
+
+  <div id="div_processos"/>
+
+  <script>
+    let processos = [];
+    
+ 
+    function adicionarProcesso() {
+
+      let processo = {
+        nome: document.getElementById("nome").value
+      }
+
+      processos.push(processo)
+
+      atualizarDivProcessos()
+    }
+
+    function atualizarDivProcessos() {
+
+      let divProcessos = document.getElementById("div_processos")
+      
+      let frag = document.createDocumentFragment()
+
+      let table = document.createElement("table")
+      table.className = "processo"
+
+      let th = document.createElement("th")
+      th.innerHTML = "Processo"
+
+      let nome = criarLinhaTabela("nome", "Nome")
+      let duracao = criarLinhaTabela("duracao", "Duração")
+
+      table.appendChild(th)
+      table.appendChild(nome)
+      table.appendChild(duracao)
+
+      frag.appendChild(table)
+      divProcessos.appendChild(frag)
+
+    }
+
+    function criarLinhaTabela(campo, nome) {
+      frag = document.createDocumentFragment()
+
+      tr = document.createElement("tr")
+      td = document.createElement("td")
+
+      td.innerHTML = `${nome}: ${document.getElementById(campo).value}`
+
+      tr.appendChild(td)
+      frag.appendChild(tr)
+
+      return frag
+    }
+    
+
+  </script>
+
+</body>
+
+</html>
