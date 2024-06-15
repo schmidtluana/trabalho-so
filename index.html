@@ -1,45 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Escalonador de Processos</title>
   <link rel="stylesheet" href="css.css">
 </head>
 
 <body>
+
+  <h1 style="text-align: center">Escalonador de Processos</h1>  
+
   <div id="formularios">
     <form>
-      <p>Tipo de processamento:</p>
-
+      <p>Escolha o tipo de processamento:</p>
+      <br>
       <input type="radio" name="tipo_processamento" value="round_robin">
-      <label for="round_robin">Round Robin</label>
+      <label for="round_robin">Round Robin (RR)</label>
       <br>
       <input type="radio" name="tipo_processamento" value="sjf">
-      <label for="sfj">Shrtest-Job-First</label>
+      <label for="sfj">Shrtest-Job-First (SFJ)</label>
       <br>
       <input type="radio" name="tipo_processamento" value="prioridade">
-      <label for="prioridade">Por prioridade</label>
+      <label for="prioridade">Por prioridade (preemptiva)</label>
+      </form>
 
-    </form>
-    <form>
-      <p>Adicionar um processo:</p>
-      <label>Nome:</label>
-      <input type="text" id="nome">
+      <form>
+      <br>    
+      <p>Adicione um processo:</p> 
       <br>
-      <label>Duracao (ciclos de máquina):</label>
-      <input type="text" id="duracao">
+      <label>Nome:</label>     
+      <input type="text" id="nome">    
+      <br>    
+      <br>      
+      <label>Duração (ciclos de máquina):</label>
+      <input type="text" id="duracao">           
+      <br>   
+      <br> 
+    </form>   
 
+      <button type="button" onclick="adicionarProcesso()">Adicionar</button>  
+    
+      <br>       
 
-      <br>
-      <button type="button" onclick="adicionarProcesso()">Adicionar</button>
-    </form>
   </div>
 
 
-  <div id="div_processos"/>
-
+  <div id="div_processos">
+ 
   <script>
     let processos = [];
     
@@ -87,15 +96,22 @@
 
       td.innerHTML = `${nome}: ${document.getElementById(campo).value}`
 
-      tr.appendChild(td)
+      tr.appendChild(td) 
       frag.appendChild(tr)
 
       return frag
-    }
-    
+    } 
+   
+</script>  
 
-  </script>
+ </div> 
+</body>  
+<br> 
+<div> 
+  <br>
+  <br>
+  <br>
+  <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
 
-</body>
-
-</html>
+</div>
+</html> 

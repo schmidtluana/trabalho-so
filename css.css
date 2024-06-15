@@ -1,19 +1,64 @@
 body {
-  padding: 2%;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 0;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
 
 input[type=text] {
-  border-radius: 3px;
+  border-radius: 2px;
+  border-style: solid; 
 }
+ 
+h1 {
+  font-size: 40px; 
+  font-weight: bold;  
+  margin: 0;  
+  padding: 0;
+}  
+p { 
+  font-size: 20px; 
+  font-weight: bold; 
+  margin: 1px;
+} 
 
-div {
-    padding: 1%;
+button {
+  background-color: #4CAF50;  
+  border: none; 
+  color: white;  
+  padding: 15px 15px;    
+  text-align: center; 
+  display: inline-block; 
+  font-size: 16px;      
+  margin: 2px 2px; 
+  cursor: pointer; 
+  border-radius: 8px; 
 }
+ 
+#formularios {
+  padding: 2%; 
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 10%;
+  margin-right: 10%; 
+  border-radius: 8px;   
+  background-color: #f9f9f9; 
+  
+} 
 
+.rodape {
+  bottom: 0;
+  position: fixed; 
+  width: 100%;
+  text-align: center;
+  
+} 
+  
 table.processo {
   padding: 5px;
   margin-top: 50px;
   border-collapse: collapse;
+  display: inline;
 }
 
 .processo > th, .processo > tr {
@@ -21,11 +66,6 @@ table.processo {
   border-color: black;
   border-width: 1px;
   padding: 5px;
-
   text-align: left;
   border-collapse: collapse;
-}
-
-table.processo {
-  display: inline;
 }
