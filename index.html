@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -10,12 +9,16 @@
 
 <body>
 
-  <h1 style="text-align: center">Escalonador de Processos</h1>  
+  <h1 style="text-align: center">Escalonador de Processos</h1>
 
   <div id="formularios">
     <form>
+
       <p>Escolha o tipo de processamento:</p>
       <br>
+
+      <p>Tipo de processamento:</p>
+
       <input type="radio" name="tipo_processamento" value="round_robin">
       <label for="round_robin">Round Robin (RR)</label>
       <br>
@@ -27,93 +30,92 @@
     </form>
 
     <form>
-      <br>    
-      <p>Adicione um processo:</p> 
       <br>
-      <label>Nome:</label>     
-      <input type="text" id="nome">    
-      <br>    
-      <br>      
+      <p>Adicione um processo:</p>
+      <label>Nome:</label>
+      <input type="text" id="nome">
+      <br>
+      <br>
       <label>Duração (ciclos de máquina):</label>
-      <input type="text" id="duracao">           
-      <br>   
-      <br> 
-    </form>   
+      <input type="text" id="duracao">
+      <br>
+      <br>
+    </form>
 
-    <button type="button" onclick="adicionarProcesso()">Adicionar</button>  
-    
-      <br>       
-      <br>       
+    <button type="button" onclick="adicionarProcesso()">Adicionar</button>
 
-    <br>       
-
+    <br>
   </div>
 
-  <div id="div_processos"></div>
+  <div id="div_processos">
 
-  <script>
-    let processos = [];
-    
-    function adicionarProcesso() {
-      let processo = {
-        nome: document.getElementById("nome").value,
-        duracao: parseInt(document.getElementById("duracao").value)
+    <script>
+      let processos = [];
+
+      function adicionarProcesso() {
+        let processo = {
+          nome: document.getElementById("nome").value,
+          duracao: parseInt(document.getElementById("duracao").value)
+        }
+
+        processos.push(processo);
+
+        atualizarDivProcessos();
       }
 
-      processos.push(processo);
+      function ordenarProcessos() {
+        processos.sort((a, b) => a.duracao - b.duracao);
+      }
 
-      atualizarDivProcessos();
-    }
+      function atualizarDivProcessos() {
 
-    function ordenarProcessos() {
-      processos.sort((a, b) => a.duracao - b.duracao);
-    }
+        let divProcessos = document.getElementById("div_processos")
 
-    function atualizarDivProcessos() {
+        let frag = document.createDocumentFragment()
 
-      let frag = document.createDocumentFragment();
-      let table = document.createElement("table");
-      table.className = "processo";
+        let table = document.createElement("table")
+        table.className = "processo"
 
-      let thead = document.createElement("thead");
-      let th1 = document.createElement("th");
-      th1.innerHTML = "Nome";
-      let th2 = document.createElement("th");
-      th2.innerHTML = "Duração";
+        let th = document.createElement("th")
+        th.innerHTML = "Processo"
 
-      thead.appendChild(th1);
-      thead.appendChild(th2);
-      table.appendChild(thead);
+        let nome = criarLinhaTabela("nome", "Nome")
+        let duracao = criarLinhaTabela("duracao", "Duração")
 
-      let tbody = document.createElement("tbody");
+        table.appendChild(th)
+        table.appendChild(nome)
+        table.appendChild(duracao)
 
-      processos.forEach(processo => {
-        let tr = document.createElement("tr");
+        frag.appendChild(table)
+        divProcessos.appendChild(frag)
 
-        let tdNome = document.createElement("td");
-        tdNome.innerHTML = processo.nome;
-        tr.appendChild(tdNome);
+      }
 
-        let tdDuracao = document.createElement("td");
-        tdDuracao.innerHTML = processo.duracao;
-        tr.appendChild(tdDuracao);
+      function criarLinhaTabela(campo, nome) {
+        frag = document.createDocumentFragment()
 
-        tbody.appendChild(tr);
-      });
+        tr = document.createElement("tr")
+        td = document.createElement("td")
 
-      table.appendChild(tbody);
-      frag.appendChild(table);
-      divProcessos.appendChild(frag);
-    }
-  </script>  
+        td.innerHTML = `${nome}: ${document.getElementById(campo).value}`
 
-  <br> 
-  <div> 
-    <br>
-    <br>
-    <br>
-    <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
+        tr.appendChild(td)
+        frag.appendChild(tr)
+
+        return frag
+      }
+
+    </script>
+
   </div>
-</body>  
-</html>
+</body>
+<br>
+<div>
+  <br>
+  <br>
+  <br>
+  <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
 
+</div>
+
+</html>
