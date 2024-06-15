@@ -43,71 +43,109 @@
     </form>
 
     <button type="button" onclick="adicionarProcesso()">Adicionar</button>
+    <button type="button" onclick="processar()">Processar</button>
 
     <br>
   </div>
 
-  <div id="div_processos" class="content">
 
-    <script>
-      let processos = [];
+  <div id="div_processos" class="content"></div>
 
-      function adicionarProcesso() {
-        let processo = {
-          nome: document.getElementById("nome").value,
-          duracao: parseInt(document.getElementById("duracao").value)
+  <div id="resultado" class="content"></div>
+
+  <script>
+    let processos = [];
+
+    function adicionarProcesso() {
+      let processo = {
+        nome: document.getElementById("nome").value,
+        duracao: parseInt(document.getElementById("duracao").value)
+      }
+
+      processos.push(processo);
+
+      atualizarDivProcessos();
+    }
+
+    function ordenarProcessos() {
+      processos.sort((a, b) => a.duracao - b.duracao);
+    }
+
+    function atualizarDivProcessos() {
+
+      let divProcessos = document.getElementById("div_processos")
+
+      let frag = document.createDocumentFragment()
+
+      let table = document.createElement("table")
+      table.className = "processo"
+
+      let th = document.createElement("th")
+      th.innerHTML = "Processo"
+
+      let nome = criarLinhaTabela("nome", "Nome")
+      let duracao = criarLinhaTabela("duracao", "Duração")
+
+      table.appendChild(th)
+      table.appendChild(nome)
+      table.appendChild(duracao)
+
+      frag.appendChild(table)
+      divProcessos.appendChild(frag)
+
+    }
+
+    function criarLinhaTabela(campo, nome) {
+      frag = document.createDocumentFragment()
+
+      tr = document.createElement("tr")
+      td = document.createElement("td")
+
+      td.innerHTML = `${nome}: ${document.getElementById(campo).value}`
+
+      tr.appendChild(td)
+      frag.appendChild(tr)
+
+      return frag
+    }
+
+    function processar() {
+      const quantum = 2;
+      let tipoProcessamento = document.querySelector('input[name="tipo_processamento"]:checked').value;
+      let resultado = document.getElementById("resultado");
+
+      if (tipoProcessamento === "round_robin") {
+        resultado.innerHTML = roundRobin();
+      }
+
+      // Cada processo recebe uma quantidade fixa de tempo de CPU (quantum) e, se não for concluído nesse período, é colocado no final da fila para aguardar sua próxima vez
+
+      function roundRobin() {
+        let tempo = 0;
+        let log = '';
+        // Cria uma cópia da lista de processos
+        let fila = [...processos];
+
+        // Loop que continua até que todos os processos sejam concluídos
+        while (fila.length > 0) {
+          //Remove o primeiro processo da fila
+          let processo = fila.shift();
+          if (processo.duracao > quantum) {
+            log += `${tempo} - ${processo.nome} (executa por ${quantum} ciclos)\n`;
+            tempo += quantum;
+            processo.duracao -= quantum;
+            fila.push(processo); // Adiciona de volta ao final da fila
+          } else {
+            log += `${tempo} - ${processo.nome} (executa por ${processo.duracao} ciclos)\n`;
+            tempo += processo.duracao;
+            processo.duracao = 0;
+          }
         }
-
-        processos.push(processo);
-
-        atualizarDivProcessos();
+        return log.replace(/\n/g, '<br>');
       }
+    }
 
-      function ordenarProcessos() {
-        processos.sort((a, b) => a.duracao - b.duracao);
-      }
-
-      function atualizarDivProcessos() {
-
-        let divProcessos = document.getElementById("div_processos")
-
-        let frag = document.createDocumentFragment()
-
-        let table = document.createElement("table")
-        table.className = "processo"
-
-        let th = document.createElement("th")
-        th.innerHTML = "Processo"
-
-        let nome = criarLinhaTabela("nome", "Nome")
-        let duracao = criarLinhaTabela("duracao", "Duração")
-
-        table.appendChild(th)
-        table.appendChild(nome)
-        table.appendChild(duracao)
-
-        frag.appendChild(table)
-        divProcessos.appendChild(frag)
-
-      }
-
-      function criarLinhaTabela(campo, nome) {
-        frag = document.createDocumentFragment()
-
-        tr = document.createElement("tr")
-        td = document.createElement("td")
-
-        td.innerHTML = `${nome}: ${document.getElementById(campo).value}`
-
-        tr.appendChild(td)
-        frag.appendChild(tr)
-
-        return frag
-      }
-
-    </script>
-
-  </div>
+  </script>
 </body>
 <br>
 <div>
