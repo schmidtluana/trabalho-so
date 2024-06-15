@@ -40,6 +40,10 @@
       <input type="text" id="duracao">
       <br>
       <br>
+      <label>Prioridade:</label>
+      <input type="text" id="prioridade">
+      <br>
+      <br>
     </form>
 
     <button type="button" onclick="adicionarProcesso()">Adicionar</button>
@@ -67,8 +71,12 @@
       atualizarDivProcessos();
     }
 
-    function ordenarProcessos() {
+    function ordenarProcessos(lista) {
       processos.sort((a, b) => a.duracao - b.duracao);
+    }
+
+    function ordenarPorPrioridade(lista) {
+      lista.sort((a, b) => a.prioridade - b.prioridade);
     }
 
     function atualizarDivProcessos() {
@@ -116,10 +124,13 @@
 
       if (tipoProcessamento === "round_robin") {
         resultado.innerHTML = roundRobin();
+      } else if (tipoProcessamento === "sjf") {
+        resultado.innerHTML = shortestJobFirst();
+      } else if (tipoProcessamento === "prioridade") {
+        resultado.innerHTML = prioridadePreemptiva();
       }
 
       // Cada processo recebe uma quantidade fixa de tempo de CPU (quantum) e, se não for concluído nesse período, é colocado no final da fila para aguardar sua próxima vez
-
       function roundRobin() {
         let tempo = 0;
         let log = '';
@@ -143,6 +154,48 @@
         }
         return log.replace(/\n/g, '<br>');
       }
+
+      function shortestJobFirst() {
+        let tempo = 0;
+        let log = '';
+        let fila = [...processos];
+
+        // Ordena os processos pela duração, do menor para o maior
+        ordenarProcessos(fila);
+
+        while (fila.length > 0) {
+          let processo = fila.shift();
+          log += `${tempo} - ${processo.nome} (executa por ${processo.duracao} ciclos)\n`;
+          tempo += processo.duracao;
+        }
+
+        return log.replace(/\n/g, '<br>');
+      }
+
+      // Cada processo terá uma prioridade associada e que o processo de maior prioridade deve ser executado primeiro. 
+      // Se um novo processo de maior prioridade chega enquanto um processo está sendo executado, 
+      // o processo atual deve ser preemptado e o novo processo deve começar a ser executado.
+
+      function prioridadePreemptiva() {
+        let tempo = 0;
+        let log = '';
+        let fila = [...processos];
+
+        // Ordena os processos pela prioridade, do menor para o maior (maior prioridade)
+        ordenarPorPrioridade(fila);
+
+        while (fila.length > 0) {
+          let processo = fila.shift();
+          log += `${tempo} - ${processo.nome} (executa por ${processo.duracao} ciclos)\n`;
+          tempo += processo.duracao;
+
+          // Reordenar a fila pela prioridade após cada execução para simular preempção
+          ordenarPorPrioridade(fila);
+        }
+
+        return log.replace(/\n/g, '<br>');
+      }
+
     }
 
   </script>
