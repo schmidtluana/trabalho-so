@@ -24,9 +24,9 @@
       <br>
       <input type="radio" name="tipo_processamento" value="prioridade">
       <label for="prioridade">Por prioridade (preemptiva)</label>
-      </form>
+    </form>
 
-      <form>
+    <form>
       <br>    
       <p>Adicione um processo:</p> 
       <br>
@@ -40,78 +40,80 @@
       <br> 
     </form>   
 
-      <button type="button" onclick="adicionarProcesso()">Adicionar</button>  
+    <button type="button" onclick="adicionarProcesso()">Adicionar</button>  
     
       <br>       
+      <br>       
+
+    <br>       
 
   </div>
 
+  <div id="div_processos"></div>
 
-  <div id="div_processos">
- 
   <script>
     let processos = [];
     
- 
     function adicionarProcesso() {
-
       let processo = {
-        nome: document.getElementById("nome").value
+        nome: document.getElementById("nome").value,
+        duracao: parseInt(document.getElementById("duracao").value)
       }
 
-      processos.push(processo)
+      processos.push(processo);
 
-      atualizarDivProcessos()
+      atualizarDivProcessos();
+    }
+
+    function ordenarProcessos() {
+      processos.sort((a, b) => a.duracao - b.duracao);
     }
 
     function atualizarDivProcessos() {
 
-      let divProcessos = document.getElementById("div_processos")
-      
-      let frag = document.createDocumentFragment()
+      let frag = document.createDocumentFragment();
+      let table = document.createElement("table");
+      table.className = "processo";
 
-      let table = document.createElement("table")
-      table.className = "processo"
+      let thead = document.createElement("thead");
+      let th1 = document.createElement("th");
+      th1.innerHTML = "Nome";
+      let th2 = document.createElement("th");
+      th2.innerHTML = "Duração";
 
-      let th = document.createElement("th")
-      th.innerHTML = "Processo"
+      thead.appendChild(th1);
+      thead.appendChild(th2);
+      table.appendChild(thead);
 
-      let nome = criarLinhaTabela("nome", "Nome")
-      let duracao = criarLinhaTabela("duracao", "Duração")
+      let tbody = document.createElement("tbody");
 
-      table.appendChild(th)
-      table.appendChild(nome)
-      table.appendChild(duracao)
+      processos.forEach(processo => {
+        let tr = document.createElement("tr");
 
-      frag.appendChild(table)
-      divProcessos.appendChild(frag)
+        let tdNome = document.createElement("td");
+        tdNome.innerHTML = processo.nome;
+        tr.appendChild(tdNome);
 
+        let tdDuracao = document.createElement("td");
+        tdDuracao.innerHTML = processo.duracao;
+        tr.appendChild(tdDuracao);
+
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      frag.appendChild(table);
+      divProcessos.appendChild(frag);
     }
+  </script>  
 
-    function criarLinhaTabela(campo, nome) {
-      frag = document.createDocumentFragment()
-
-      tr = document.createElement("tr")
-      td = document.createElement("td")
-
-      td.innerHTML = `${nome}: ${document.getElementById(campo).value}`
-
-      tr.appendChild(td) 
-      frag.appendChild(tr)
-
-      return frag
-    } 
-   
-</script>  
-
- </div> 
+  <br> 
+  <div> 
+    <br>
+    <br>
+    <br>
+    <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
+  </div>
 </body>  
-<br> 
-<div> 
-  <br>
-  <br>
-  <br>
-  <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
+</html>
 
-</div>
-</html> 
