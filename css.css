@@ -69,3 +69,25 @@ table.processo {
   text-align: left;
   border-collapse: collapse;
 }
+
+
+table.linha_do_tempo {
+
+  padding: 5px;
+  border-collapse: collapse;
+
+}
+
+
+.linha_do_tempo > tr, .linha_do_tempo > tr > th, .linha_do_tempo > tr > td {
+  border-style: solid;
+  border-color: black;
+  border-width: 1px;
+  padding: 5px;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.linha_do_tempo > tr :first-child {
+  background-color: #ddd;
+}

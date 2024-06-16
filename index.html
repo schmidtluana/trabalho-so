@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="pt-br">
 
 <head>
@@ -59,11 +60,13 @@
 
   <script>
     let processos = [];
+    let linhaDoTempo = [];
 
     function adicionarProcesso() {
       let processo = {
-        nome: document.getElementById("nome").value,
-        duracao: parseInt(document.getElementById("duracao").value)
+        nome: processos.length + 1,
+        duracao: parseInt(document.getElementById("duracao").value),
+        prioridade: parseInt(document.getElementById("prioridade").value)
       }
 
       processos.push(processo);
@@ -71,7 +74,7 @@
       atualizarDivProcessos();
     }
 
-    function ordenarProcessos(lista) {
+    function ordenarPorDuracao(lista) {
       processos.sort((a, b) => a.duracao - b.duracao);
     }
 
@@ -85,31 +88,37 @@
 
       let frag = document.createDocumentFragment()
 
-      let table = document.createElement("table")
-      table.className = "processo"
+      for (processo of processos) {
+        let table = document.createElement("table")
+        table.className = "processo"
 
-      let th = document.createElement("th")
-      th.innerHTML = "Processo"
+        let th = document.createElement("th")
+        th.innerHTML = "Processo"
 
-      let nome = criarLinhaTabela("nome", "Nome")
-      let duracao = criarLinhaTabela("duracao", "Duração")
+        let nome = criarLinhaTabela("Nome", processo.nome)
+        let duracao = criarLinhaTabela("Duração", processo.duracao)
+        let prioridade = criarLinhaTabela("Prioridade", processo.prioridade)
 
-      table.appendChild(th)
-      table.appendChild(nome)
-      table.appendChild(duracao)
+        table.appendChild(th)
+        table.appendChild(nome)
+        table.appendChild(duracao)
+        table.appendChild(prioridade)
 
-      frag.appendChild(table)
+        frag.appendChild(table)
+      }
+
+      divProcessos.innerHTML = ''
       divProcessos.appendChild(frag)
 
     }
 
-    function criarLinhaTabela(campo, nome) {
-      frag = document.createDocumentFragment()
+    function criarLinhaTabela(nome, valor) {
+      let frag = document.createDocumentFragment()
 
-      tr = document.createElement("tr")
-      td = document.createElement("td")
+      let tr = document.createElement("tr")
+      let td = document.createElement("td")
 
-      td.innerHTML = `${nome}: ${document.getElementById(campo).value}`
+      td.innerHTML = `${nome}: ${valor}`
 
       tr.appendChild(td)
       frag.appendChild(tr)
@@ -117,10 +126,52 @@
       return frag
     }
 
+    function criarTabelaLinhaDoTempo() {
+
+      let divResultado = document.getElementById("resultado")
+
+      let frag = document.createDocumentFragment()
+
+      let table = document.createElement("table")
+      table.className = "linha_do_tempo"
+
+      let tr_headerRow = document.createElement("tr")
+      let th_titulo = document.createElement("th")
+      th_titulo.innerHTML = 'Tempo de maquina:'
+      tr_headerRow.appendChild(th_titulo)
+
+      let tr_dataRow = document.createElement("tr")
+      let td_titulo = document.createElement("td")
+      td_titulo.innerHTML = 'Processo:'
+      tr_dataRow.appendChild(td_titulo)
+
+
+
+      for (let index in linhaDoTempo) {
+        let th = document.createElement("th")
+        th.innerHTML = index
+        tr_headerRow.appendChild(th)
+      }
+
+
+      for (let processo of linhaDoTempo) {
+        let td = document.createElement("td")
+        td.innerHTML = processo.nome
+        tr_dataRow.appendChild(td)
+      }
+
+      table.appendChild(tr_headerRow)
+      table.appendChild(tr_dataRow)
+
+      divResultado.innerHTML = ''
+      divResultado.appendChild(table)
+    }
+
     function processar() {
-      const quantum = 2;
       let tipoProcessamento = document.querySelector('input[name="tipo_processamento"]:checked').value;
       let resultado = document.getElementById("resultado");
+
+      linhaDoTempo = []
 
       if (tipoProcessamento === "round_robin") {
         resultado.innerHTML = roundRobin();
@@ -130,70 +181,70 @@
         resultado.innerHTML = prioridadePreemptiva();
       }
 
+      criarTabelaLinhaDoTempo()
+    }
+
+    // Cada processo recebe uma quantidade fixa de tempo de CPU (quantum) e, se não for concluído nesse período, é colocado no final da fila para aguardar sua próxima vez
+    function roundRobin() {
+      const quantum = 2;
+
+      let fila = [...processos];
       // Cada processo recebe uma quantidade fixa de tempo de CPU (quantum) e, se não for concluído nesse período, é colocado no final da fila para aguardar sua próxima vez
-      function roundRobin() {
-        let tempo = 0;
-        let log = '';
-        // Cria uma cópia da lista de processos
-        let fila = [...processos];
 
-        // Loop que continua até que todos os processos sejam concluídos
-        while (fila.length > 0) {
-          //Remove o primeiro processo da fila
-          let processo = fila.shift();
-          if (processo.duracao > quantum) {
-            log += `${tempo} - ${processo.nome} (executa por ${quantum} ciclos)\n`;
-            tempo += quantum;
-            processo.duracao -= quantum;
-            fila.push(processo); // Adiciona de volta ao final da fila
-          } else {
-            log += `${tempo} - ${processo.nome} (executa por ${processo.duracao} ciclos)\n`;
-            tempo += processo.duracao;
-            processo.duracao = 0;
-          }
-        }
-        return log.replace(/\n/g, '<br>');
-      }
-
-      function shortestJobFirst() {
-        let tempo = 0;
-        let log = '';
-        let fila = [...processos];
-
-        // Ordena os processos pela duração, do menor para o maior
-        ordenarProcessos(fila);
-
-        while (fila.length > 0) {
-          let processo = fila.shift();
-          log += `${tempo} - ${processo.nome} (executa por ${processo.duracao} ciclos)\n`;
-          tempo += processo.duracao;
+      // Loop que continua até que todos os processos sejam concluídos
+      while (fila.length > 0) {
+        //Remove o primeiro processo da fila
+        let processo = fila.shift();
+     
+        for (i=0; i < quantum && processo.duracao != 0; i++) {
+          processo.duracao -= 1
+          linhaDoTempo.push(processo)
         }
 
-        return log.replace(/\n/g, '<br>');
+
+        if (processo.duracao > 0) fila.push(processo); // Adiciona de volta ao final da fila
+      }
+    }
+
+    function shortestJobFirst() {
+
+      let fila = [...processos];
+
+      // Ordena os processos pela duração, do menor para o maior
+      ordenarPorDuracao(fila);
+
+      while (fila.length > 0) {
+        let processo = fila.shift();
+       
+        while (processo.duracao > 0) {
+          processo.duracao -= 1
+          linhaDoTempo.push(processo)
+        }
       }
 
-      // Cada processo terá uma prioridade associada e que o processo de maior prioridade deve ser executado primeiro. 
-      // Se um novo processo de maior prioridade chega enquanto um processo está sendo executado, 
-      // o processo atual deve ser preemptado e o novo processo deve começar a ser executado.
+    }
 
-      function prioridadePreemptiva() {
-        let tempo = 0;
-        let log = '';
-        let fila = [...processos];
+    // Cada processo terá uma prioridade associada e que o processo de maior prioridade deve ser executado primeiro. 
+    // Se um novo processo de maior prioridade chega enquanto um processo está sendo executado, 
+    // o processo atual deve ser preemptado e o novo processo deve começar a ser executado.
 
-        // Ordena os processos pela prioridade, do menor para o maior (maior prioridade)
+    function prioridadePreemptiva() {
+      let tempo = 0;
+      let log = '';
+      let fila = [...processos];
+
+      // Ordena os processos pela prioridade, do menor para o maior (maior prioridade)
+      ordenarPorPrioridade(fila);
+
+      while (fila.length > 0) {
+        let processo = fila.shift();
+        
+        processo.duracao -= 1
+        linhaDoTempo.push (processo)
+
+        if (processo.duracao > 0) fila.push(processo)
+        // Reordenar a fila pela prioridade após cada execução para simular preempção
         ordenarPorPrioridade(fila);
-
-        while (fila.length > 0) {
-          let processo = fila.shift();
-          log += `${tempo} - ${processo.nome} (executa por ${processo.duracao} ciclos)\n`;
-          tempo += processo.duracao;
-
-          // Reordenar a fila pela prioridade após cada execução para simular preempção
-          ordenarPorPrioridade(fila);
-        }
-
-        return log.replace(/\n/g, '<br>');
       }
 
     }
