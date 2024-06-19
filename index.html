@@ -6,25 +6,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escalonador de Processos</title>
   <link rel="stylesheet" href="css.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+<style>
+  /* Adiciona estilo diretamente no cabeçalho para o gráfico */
+  #roundRobinChart {
+    max-width: 600px;
+    max-height: 300px;
+    margin: auto;
+    display: block;
+  }
+</style>  
 
 <body>
-
+ 
   <h1 style="text-align: center">Escalonador de Processos</h1>
 
   <div id="formularios" class="content">
     <form>
-
       <p>Escolha o tipo de processamento:</p>
       <br>
-
       <p>Tipo de processamento:</p>
-
-      <input type="radio" name="tipo_processamento" value="round_robin">
+      <input type="radio" name="tipo_processamento" value="round_robin" checked>
       <label for="round_robin">Round Robin (RR)</label>
       <br>
       <input type="radio" name="tipo_processamento" value="sjf">
-      <label for="sfj">Shrtest-Job-First (SFJ)</label>
+      <label for="sjf">Shortest-Job-First (SJF)</label>
       <br>
       <input type="radio" name="tipo_processamento" value="prioridade">
       <label for="prioridade">Por prioridade (preemptiva)</label>
@@ -44,49 +51,47 @@
       <input type="text" id="prioridade">
       <br>
       <br>
-      <input type="checkbox" id="ioBound">
-      <label>I/O Bound</label>
-      <br>
-      <br>
+     <!--<input type="checkbox" id="ioBound">--> 
+     <!-- # <label>I/O Bound</label>--> 
+      <br> 
+      <br> 
     </form>
-
+ 
     <button type="button" onclick="adicionarProcesso()">Adicionar</button>
     <button type="button" onclick="processar()">Processar</button>
-
-    <br>
-  </div>
-
-
+    <br> 
+  </div> 
+ 
   <div id="div_processos" class="content"></div>
-
   <div id="resultado" class="content"></div>
-
+  <canvas id="roundRobinChart" width="800" height="400"></canvas>
+ 
+  <!-- linha 79: ioBound: document.getElementById("ioBound").checked --> 
+  <!-- linha 81: 
+      <! -- if (processo.ioBound) { 
+        processo.prioridade = 10;
+        processo.duracao = 0;
+      }
+-->
   <script>
     let processos = [];
     let linhaDoTempo = [];
 
     function adicionarProcesso() {
       let processo = {
-        nome: processos.length + 1,
+        nome: `P${processos.length + 1}`,
         duracao: parseInt(document.getElementById("duracao").value) || 1,
         prioridade: parseInt(document.getElementById("prioridade").value) || 0,
-        ioBound: document.getElementById("ioBound").checked
-      }
-
-      if (processo.ioBound) {
-        processo.prioridade = 10;
-        processo.duracao = 0;
-      }
-
+      
+      } 
+      
       processos.push(processo);
-
       console.log(processo)
-
       atualizarDivProcessos();
     }
 
     function ordenarPorDuracao(lista) {
-      processos.sort((a, b) => a.duracao - b.duracao);
+      lista.sort((a, b) => a.duracao - b.duracao);
     }
 
     function ordenarPorPrioridade(lista) {
@@ -94,12 +99,10 @@
     }
 
     function atualizarDivProcessos() {
-
       let divProcessos = document.getElementById("div_processos")
-
       let frag = document.createDocumentFragment()
 
-      for (processo of processos) {
+      for (let processo of processos) {
         let table = document.createElement("table")
         table.className = "processo"
 
@@ -120,42 +123,33 @@
 
       divProcessos.innerHTML = ''
       divProcessos.appendChild(frag)
-
     }
 
     function criarLinhaTabela(nome, valor) {
       let frag = document.createDocumentFragment()
-
       let tr = document.createElement("tr")
       let td = document.createElement("td")
-
       td.innerHTML = `${nome}: ${valor}`
-
       tr.appendChild(td)
       frag.appendChild(tr)
-
       return frag
     }
 
     function criarTabelaLinhaDoTempo() {
-
       let tamanhoMaximoDivisao = 20
-
       let totalDivisoes = Math.floor((linhaDoTempo.length + 1) / tamanhoMaximoDivisao) + 1
       let divResultado = document.getElementById("resultado")
 
       divResultado.innerHTML = ''
 
       for (let divisaoAtual = 0; divisaoAtual < totalDivisoes; divisaoAtual++) {
-
         let frag = document.createDocumentFragment()
-
         let table = document.createElement("table")
         table.className = "linha_do_tempo"
 
         let tr_headerRow = document.createElement("tr")
         let th_titulo = document.createElement("th")
-        th_titulo.innerHTML = 'Tempo de maquina:'
+        th_titulo.innerHTML = 'Tempo de máquina:'
         tr_headerRow.appendChild(th_titulo)
 
         let tr_dataRow = document.createElement("tr")
@@ -164,9 +158,6 @@
         tr_dataRow.appendChild(td_titulo)
 
         for (let i = divisaoAtual * tamanhoMaximoDivisao; i < tamanhoMaximoDivisao * (divisaoAtual + 1) && i < linhaDoTempo.length; i++) {
-
-          console.log(i)
-
           let th = document.createElement("th")
           th.innerHTML = i + 1
           tr_headerRow.appendChild(th)
@@ -180,7 +171,6 @@
 
         table.appendChild(tr_headerRow)
         table.appendChild(tr_dataRow)
-
         divResultado.appendChild(table)
         divResultado.append(document.createElement("br"))
       }
@@ -188,48 +178,38 @@
 
     function processar() {
       let tipoProcessamento = document.querySelector('input[name="tipo_processamento"]:checked').value;
-      let resultado = document.getElementById("resultado");
-
       linhaDoTempo = []
 
       if (tipoProcessamento === "round_robin") {
-        resultado.innerHTML = roundRobin();
+        roundRobin();
       } else if (tipoProcessamento === "sjf") {
-        resultado.innerHTML = shortestJobFirst();
+        shortestJobFirst();
       } else if (tipoProcessamento === "prioridade") {
-        resultado.innerHTML = prioridadePreemptiva();
+        prioridadePreemptiva();
       }
 
       criarTabelaLinhaDoTempo()
+      criarGrafico()
     }
 
-    // Cada processo recebe uma quantidade fixa de tempo de CPU (quantum) e, se não for concluído nesse período, é colocado no final da fila para aguardar sua próxima vez
     function roundRobin() {
       const quantum = 2;
-
       let fila = [...processos];
-      // Cada processo recebe uma quantidade fixa de tempo de CPU (quantum) e, se não for concluído nesse período, é colocado no final da fila para aguardar sua próxima vez
 
-      // Loop que continua até que todos os processos sejam concluídos
       while (fila.length > 0) {
-        //Remove o primeiro processo da fila
         let processo = fila.shift();
 
-        for (i = 0; i < quantum && processo.duracao != 0; i++) {
+        for (let i = 0; i < quantum && processo.duracao > 0; i++) {
           processo.duracao -= 1
-          linhaDoTempo.push(processo)
+          linhaDoTempo.push({ ...processo })
         }
 
-
-        if (processo.duracao > 0) fila.push(processo); // Adiciona de volta ao final da fila
+        if (processo.duracao > 0) fila.push(processo);
       }
     }
 
     function shortestJobFirst() {
-
       let fila = [...processos];
-
-      // Ordena os processos pela duração, do menor para o maior
       ordenarPorDuracao(fila);
 
       while (fila.length > 0) {
@@ -237,66 +217,109 @@
 
         while (processo.duracao > 0) {
           processo.duracao -= 1
-          linhaDoTempo.push(processo)
+          linhaDoTempo.push({ ...processo })
         }
       }
-
     }
 
-    // Cada processo terá uma prioridade associada e que o processo de maior prioridade deve ser executado primeiro. 
-    // Se um novo processo de maior prioridade chega enquanto um processo está sendo executado, 
-    // o processo atual deve ser preemptado e o novo processo deve começar a ser executado.
-
     function prioridadePreemptiva() {
-      let tempo = 0;
-      let log = '';
       let fila = [...processos];
-
-      // Ordena os processos pela prioridade, do menor para o maior (maior prioridade)
       ordenarPorPrioridade(fila);
 
-      console.log(`ioBound: ${fila.filter(p => p.ioBound).length} - todas: ${fila.length}`)
-
-      while (fila.length > 0 || fila.filter(p => p.ioBound).length < fila.length) {
+      while (fila.length > 0) {
         let processo = fila.shift();
 
         processo.duracao -= 1
-        linhaDoTempo.push(processo)
+        linhaDoTempo.push({ ...processo })
 
-        if (processo.duracao > 0 || processo.ioBound) fila.push(processo)
-
-        // gerarEventoIO(fila)
-        // Reordenar a fila pela prioridade após cada execução para simular preempção
+        if (processo.duracao > 0) fila.push(processo)
         ordenarPorPrioridade(fila);
       }
-
     }
 
-    function gerarEventoIO(processos) {
+    function criarGrafico() {
+      const ctx = document.getElementById('roundRobinChart').getContext('2d');
+      
+      // Mapa de cores para os processos
+      const colors = [
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)',
+        'rgba(201, 203, 207, 0.2)'
+      ];
 
-      chanceGerarEvento = Math.floor(Math.random() * 10)
+      const borderColors = [
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(201, 203, 207, 1)'
+      ];
 
-      console.log(`Gerando interrupção no tempo ${linhaDoTempo.length + 1}`)
+      const labels = Array.from({ length: linhaDoTempo.length }, (_, i) => i + 1);
+      const processNames = [...new Set(linhaDoTempo.map(processo => processo.nome))];
+      const datasets = processNames.map((nome, index) => {
+        return {
+          label: nome,
+          data: linhaDoTempo.map((processo, i) => processo.nome === nome ? i + 1 : null).filter(v => v !== null),
+          backgroundColor: colors[index % colors.length],
+          borderColor: borderColors[index % borderColors.length],
+          borderWidth: 1
+        }
+      });
 
-      if (chanceGerarEvento == 1) {
-        for (processo of processos) {
-          if (processo.ioBound) {
-            processo.prioridade = 0
-            processo.duracao += 1
+      const data = {
+        labels: labels,
+        datasets: datasets
+      };
+
+      const config = {
+        type: 'bar',
+        data: data,
+        options: {
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Tempo'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Processo'
+              },
+              beginAtZero: true
+            }
           }
         }
-      }
+      };
+
+      new Chart(ctx, config);
     }
+  </script>
+
+</body>
+
+</html>
+
+
 
   </script>
-</body>
+</body> 
 <br>
 <div>
   <br>
   <br>
   <br>
-  <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
 
 </div>
-
+<footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
 </html>
+
+ 
