@@ -72,7 +72,6 @@ table.processo {
 
 
 table.linha_do_tempo {
-
   padding: 5px;
   border-collapse: collapse;
 
@@ -90,4 +89,12 @@ table.linha_do_tempo {
 
 .linha_do_tempo > tr :first-child {
   background-color: #ddd;
+}
+
+.linha_do_tempo > tr > th:not(:first-child) {
+  width: 4.5%;
+}
+
+.linha_do_tempo > tr > th:first-child {
+  width: 10%;
 }

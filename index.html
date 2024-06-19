@@ -35,11 +35,17 @@
       <p>Adicione um processo:</p>
       <br>
       <label>Duração (ciclos de máquina):</label>
+      <br>
       <input type="text" id="duracao">
       <br>
       <br>
-      <label>Prioridade:</label>
+      <label>Prioridade (Quanto mais próximo de 0, maior a prioridade):</label>
+      <br>
       <input type="text" id="prioridade">
+      <br>
+      <br>
+      <input type="checkbox" id="ioBound">
+      <label>I/O Bound</label>
       <br>
       <br>
     </form>
@@ -62,11 +68,19 @@
     function adicionarProcesso() {
       let processo = {
         nome: processos.length + 1,
-        duracao: parseInt(document.getElementById("duracao").value),
-        prioridade: parseInt(document.getElementById("prioridade").value)
+        duracao: parseInt(document.getElementById("duracao").value) || 1,
+        prioridade: parseInt(document.getElementById("prioridade").value) || 0,
+        ioBound: document.getElementById("ioBound").checked
+      }
+
+      if (processo.ioBound) {
+        processo.prioridade = 10;
+        processo.duracao = 0;
       }
 
       processos.push(processo);
+
+      console.log(processo)
 
       atualizarDivProcessos();
     }
@@ -125,43 +139,51 @@
 
     function criarTabelaLinhaDoTempo() {
 
+      let tamanhoMaximoDivisao = 20
+
+      let totalDivisoes = Math.floor((linhaDoTempo.length + 1) / tamanhoMaximoDivisao) + 1
       let divResultado = document.getElementById("resultado")
 
-      let frag = document.createDocumentFragment()
-
-      let table = document.createElement("table")
-      table.className = "linha_do_tempo"
-
-      let tr_headerRow = document.createElement("tr")
-      let th_titulo = document.createElement("th")
-      th_titulo.innerHTML = 'Tempo de maquina:'
-      tr_headerRow.appendChild(th_titulo)
-
-      let tr_dataRow = document.createElement("tr")
-      let td_titulo = document.createElement("td")
-      td_titulo.innerHTML = 'Processo:'
-      tr_dataRow.appendChild(td_titulo)
-
-
-
-      for (let index in linhaDoTempo) {
-        let th = document.createElement("th")
-        th.innerHTML = index
-        tr_headerRow.appendChild(th)
-      }
-
-
-      for (let processo of linhaDoTempo) {
-        let td = document.createElement("td")
-        td.innerHTML = processo.nome
-        tr_dataRow.appendChild(td)
-      }
-
-      table.appendChild(tr_headerRow)
-      table.appendChild(tr_dataRow)
-
       divResultado.innerHTML = ''
-      divResultado.appendChild(table)
+
+      for (let divisaoAtual = 0; divisaoAtual < totalDivisoes; divisaoAtual++) {
+
+        let frag = document.createDocumentFragment()
+
+        let table = document.createElement("table")
+        table.className = "linha_do_tempo"
+
+        let tr_headerRow = document.createElement("tr")
+        let th_titulo = document.createElement("th")
+        th_titulo.innerHTML = 'Tempo de maquina:'
+        tr_headerRow.appendChild(th_titulo)
+
+        let tr_dataRow = document.createElement("tr")
+        let td_titulo = document.createElement("td")
+        td_titulo.innerHTML = 'Processo:'
+        tr_dataRow.appendChild(td_titulo)
+
+        for (let i = divisaoAtual * tamanhoMaximoDivisao; i < tamanhoMaximoDivisao * (divisaoAtual + 1) && i < linhaDoTempo.length; i++) {
+
+          console.log(i)
+
+          let th = document.createElement("th")
+          th.innerHTML = i + 1
+          tr_headerRow.appendChild(th)
+        }
+
+        for (let i = divisaoAtual * tamanhoMaximoDivisao; i < tamanhoMaximoDivisao * (divisaoAtual + 1) && i < linhaDoTempo.length; i++) {
+          let td = document.createElement("td")
+          td.innerHTML = linhaDoTempo[i].nome
+          tr_dataRow.appendChild(td)
+        }
+
+        table.appendChild(tr_headerRow)
+        table.appendChild(tr_dataRow)
+
+        divResultado.appendChild(table)
+        divResultado.append(document.createElement("br"))
+      }
     }
 
     function processar() {
@@ -192,8 +214,8 @@
       while (fila.length > 0) {
         //Remove o primeiro processo da fila
         let processo = fila.shift();
-     
-        for (i=0; i < quantum && processo.duracao != 0; i++) {
+
+        for (i = 0; i < quantum && processo.duracao != 0; i++) {
           processo.duracao -= 1
           linhaDoTempo.push(processo)
         }
@@ -212,7 +234,7 @@
 
       while (fila.length > 0) {
         let processo = fila.shift();
-       
+
         while (processo.duracao > 0) {
           processo.duracao -= 1
           linhaDoTempo.push(processo)
@@ -233,17 +255,37 @@
       // Ordena os processos pela prioridade, do menor para o maior (maior prioridade)
       ordenarPorPrioridade(fila);
 
-      while (fila.length > 0) {
-        let processo = fila.shift();
-        
-        processo.duracao -= 1
-        linhaDoTempo.push (processo)
+      console.log(`ioBound: ${fila.filter(p => p.ioBound).length} - todas: ${fila.length}`)
 
-        if (processo.duracao > 0) fila.push(processo)
+      while (fila.length > 0 || fila.filter(p => p.ioBound).length < fila.length) {
+        let processo = fila.shift();
+
+        processo.duracao -= 1
+        linhaDoTempo.push(processo)
+
+        if (processo.duracao > 0 || processo.ioBound) fila.push(processo)
+
+        // gerarEventoIO(fila)
         // Reordenar a fila pela prioridade após cada execução para simular preempção
         ordenarPorPrioridade(fila);
       }
 
+    }
+
+    function gerarEventoIO(processos) {
+
+      chanceGerarEvento = Math.floor(Math.random() * 10)
+
+      console.log(`Gerando interrupção no tempo ${linhaDoTempo.length + 1}`)
+
+      if (chanceGerarEvento == 1) {
+        for (processo of processos) {
+          if (processo.ioBound) {
+            processo.prioridade = 0
+            processo.duracao += 1
+          }
+        }
+      }
     }
 
   </script>
