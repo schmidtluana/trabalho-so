@@ -16,10 +16,10 @@
     margin: auto;
     display: block;
   }
-</style>  
+</style>
 
 <body>
- 
+
   <h1 style="text-align: center">Escalonador de Processos</h1>
 
   <div id="formularios" class="content">
@@ -48,31 +48,23 @@
       <br>
       <label>Prioridade (Quanto mais próximo de 0, maior a prioridade):</label>
       <br>
-      <input type="text" id="prioridade">
+      <input type="text" id="prioridade" min="1" max="9">
       <br>
       <br>
-     <!--<input type="checkbox" id="ioBound">--> 
-     <!-- # <label>I/O Bound</label>--> 
-      <br> 
-      <br> 
+      <input type="checkbox" id="ioBound">
+      <label>I/O Bound</label>
+      <br>
+      <br>
     </form>
- 
+
     <button type="button" onclick="adicionarProcesso()">Adicionar</button>
     <button type="button" onclick="processar()">Processar</button>
-    <br> 
-  </div> 
- 
+    <br>
+  </div>
+
   <div id="div_processos" class="content"></div>
   <div id="resultado" class="content"></div>
   <canvas id="roundRobinChart" width="800" height="400"></canvas>
- 
-  <!-- linha 79: ioBound: document.getElementById("ioBound").checked --> 
-  <!-- linha 81: 
-      <! -- if (processo.ioBound) { 
-        processo.prioridade = 10;
-        processo.duracao = 0;
-      }
--->
   <script>
     let processos = [];
     let linhaDoTempo = [];
@@ -81,10 +73,19 @@
       let processo = {
         nome: `P${processos.length + 1}`,
         duracao: parseInt(document.getElementById("duracao").value) || 1,
-        prioridade: parseInt(document.getElementById("prioridade").value) || 0,
+        prioridade: parseInt(document.getElementById("prioridade").value) || 1,
+        ioBound: document.getElementById("ioBound").checked
+      }
+
+      if (processo.prioridade > 9) processo.prioridade = 9
       
-      } 
-      
+      if (processo.prioridade < 1) processo.prioridade = 1 
+
+      if (processo.ioBound) {
+        processo.prioridade = 10;
+        processo.duracao = 1;
+      }
+
       processos.push(processo);
       console.log(processo)
       atualizarDivProcessos();
@@ -161,12 +162,14 @@
           let th = document.createElement("th")
           th.innerHTML = i + 1
           tr_headerRow.appendChild(th)
+          if (linhaDoTempo[i].ioBound) th.className = "ioBound"
         }
 
         for (let i = divisaoAtual * tamanhoMaximoDivisao; i < tamanhoMaximoDivisao * (divisaoAtual + 1) && i < linhaDoTempo.length; i++) {
           let td = document.createElement("td")
           td.innerHTML = linhaDoTempo[i].nome
           tr_dataRow.appendChild(td)
+          if (linhaDoTempo[i].ioBound) td.className = "ioBound"
         }
 
         table.appendChild(tr_headerRow)
@@ -226,20 +229,39 @@
       let fila = [...processos];
       ordenarPorPrioridade(fila);
 
-      while (fila.length > 0) {
+      while (fila.length > 0 && fila.filter(p => !p.ioBound).length > 0) {
         let processo = fila.shift();
 
         processo.duracao -= 1
         linhaDoTempo.push({ ...processo })
+        if (processo.ioBound) processo.prioridade = 10
 
-        if (processo.duracao > 0) fila.push(processo)
+        if (processo.duracao > 0 || processo.ioBound) fila.push(processo)
         ordenarPorPrioridade(fila);
+        gerarEventoIO(fila)
+
+        if (linhaDoTempo.length > 250) break
+      }
+    }
+
+    function gerarEventoIO(fila) {
+
+      let chanceGerarEvento = Math.floor(Math.random() * 20)
+
+      if (chanceGerarEvento == 1) {
+        console.log("Gerado evento IO")
+        for (processo of fila) {
+          if (processo.ioBound) {
+            processo.duracao += 1
+            processo.prioridade = 0
+          } 
+        }
       }
     }
 
     function criarGrafico() {
       const ctx = document.getElementById('roundRobinChart').getContext('2d');
-      
+
       // Mapa de cores para os processos
       const colors = [
         'rgba(255, 99, 132, 0.2)',
@@ -303,23 +325,13 @@
       new Chart(ctx, config);
     }
   </script>
+  <br>
+  <div>
+    <br>
+    <br>
+    <br>
 
-</body>
+  </div>
+  <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
 
 </html>
-
-
-
-  </script>
-</body> 
-<br>
-<div>
-  <br>
-  <br>
-  <br>
-
-</div>
-<footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
-</html>
-
- 

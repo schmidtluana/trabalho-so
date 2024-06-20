@@ -98,3 +98,7 @@ table.linha_do_tempo {
 .linha_do_tempo > tr > th:first-child {
   width: 10%;
 }
+
+td.ioBound, th.ioBound {
+  background-color: #4CAF50;
+}
