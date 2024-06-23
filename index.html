@@ -51,6 +51,11 @@
       <input type="text" id="prioridade" min="1" max="9">
       <br>
       <br>
+      <label>Quantum (ciclos por processo):</label>
+      <br>
+      <input type="text" id="quantum">
+      <br>
+      <br>
       <input type="checkbox" id="ioBound">
       <label>I/O Bound</label>
       <br>
@@ -59,11 +64,14 @@
 
     <button type="button" onclick="adicionarProcesso()">Adicionar</button>
     <button type="button" onclick="processar()">Processar</button>
+    <button type="button" onclick="limparProcessos()">Limpar Processos</button>
+    <button type="button" onclick="limparResultado()">Limpar Resultados</button>
+
     <br>
   </div>
 
-  <div id="div_processos" class="content"></div>
-  <div id="resultado" class="content"></div>
+  <div id="divProcessos" class="content"></div>
+  <div id="divResultado" class="content"></div>
   <canvas id="roundRobinChart" width="800" height="400"></canvas>
   <script>
     let processos = [];
@@ -100,7 +108,7 @@
     }
 
     function atualizarDivProcessos() {
-      let divProcessos = document.getElementById("div_processos")
+      let divProcessos = document.getElementById("divProcessos")
       let frag = document.createDocumentFragment()
 
       for (let processo of processos) {
@@ -139,7 +147,7 @@
     function criarTabelaLinhaDoTempo() {
       let tamanhoMaximoDivisao = 20
       let totalDivisoes = Math.floor((linhaDoTempo.length + 1) / tamanhoMaximoDivisao) + 1
-      let divResultado = document.getElementById("resultado")
+      let divResultado = document.getElementById("divResultado")
 
       divResultado.innerHTML = ''
 
@@ -183,21 +191,23 @@
       let tipoProcessamento = document.querySelector('input[name="tipo_processamento"]:checked').value;
       linhaDoTempo = []
 
+      let fila = clonarListaProcessos()
       if (tipoProcessamento === "round_robin") {
-        roundRobin();
+        roundRobin(fila);
       } else if (tipoProcessamento === "sjf") {
-        shortestJobFirst();
+        shortestJobFirst(fila);
       } else if (tipoProcessamento === "prioridade") {
-        prioridadePreemptiva();
+        prioridadePreemptiva(fila);
       }
+
+      limparGrafico()
 
       criarTabelaLinhaDoTempo()
       criarGrafico()
     }
 
-    function roundRobin() {
-      const quantum = 2;
-      let fila = [...processos];
+    function roundRobin(fila) {
+      const quantum = document.getElementById("quantum").value;
 
       while (fila.length > 0) {
         let processo = fila.shift();
@@ -211,8 +221,7 @@
       }
     }
 
-    function shortestJobFirst() {
-      let fila = [...processos];
+    function shortestJobFirst(fila) {
       ordenarPorDuracao(fila);
 
       while (fila.length > 0) {
@@ -225,8 +234,7 @@
       }
     }
 
-    function prioridadePreemptiva() {
-      let fila = [...processos];
+    function prioridadePreemptiva(fila) {
       ordenarPorPrioridade(fila);
 
       while (fila.length > 0 && fila.filter(p => !p.ioBound).length > 0) {
@@ -255,6 +263,14 @@
           } 
         }
       }
+    }
+
+    function clonarListaProcessos() {
+      let clone = []
+      for (processo of processos) {
+        clone.push({...processo})
+      }
+      return clone
     }
 
     function criarGrafico() {
@@ -322,6 +338,26 @@
 
       new Chart(ctx, config);
     }
+  
+    function limparProcessos() {
+      processos = []
+      atualizarDivProcessos()
+    }
+
+    function limparResultado() {
+      let divResultado = document.getElementById("divResultado")
+      divResultado.innerHTML = ''
+
+      limparGrafico()
+    }
+
+    function limparGrafico() {
+
+      let canvas = Chart.getChart("roundRobinChart")
+      if (canvas != undefined) {
+        canvas.destroy()
+      }
+    }
   </script>
   <br>
   <div>
@@ -330,6 +366,6 @@
     <br>
 
   </div>
-  <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Schmidt e Mateus Maas.</footer>
+  <footer class="rodape">Desenvolvido por: Alani Rigotti de Oliveira, Luana Caroline Schmidt e Mateus Henrique Maas.</footer>
 
 </html>
